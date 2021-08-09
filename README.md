@@ -1,7 +1,19 @@
 # Telegram Basic Bot
 
-Consider:
+Use an environment to avoid crash between libraries
 
+## What to do when updates the code?
+
+1. Update the commands in Telegram Father
+
+2. Update in the platform host
+
+## PTB Wiki
+
+https://github.com/python-telegram-bot/python-telegram-bot/wiki
+
+
+## Consider:
 
 `pip install python-telegram-bot[passport]` installs the cryptography library. Use this, if you want to use Telegram Passport related functionality.
 
@@ -10,5 +22,7 @@ Consider:
 `pip install python-telegram-bot[socks]` installs the PySocks library. Use this, if you want to work behind a Socks5 server.
 
 
+## Resources
 
+https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
