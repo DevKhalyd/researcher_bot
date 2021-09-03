@@ -1,1 +1,8 @@
+
+# Environment
 /.venv
+__pycache__
+
+# Sensible data
+*.json
+*.env

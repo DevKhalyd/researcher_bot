@@ -10,14 +10,16 @@ from telegram import Update
 from datetime import time
 from pytz import timezone
 
-bot_token = '1923146736:AAG9u9kHT-L7bYrcQaP-iRSm12f8fXfojwg'
+from utils import getBotToken, getPort
 
 # Enable logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+# TODO: Add the wake_up method to the bot
 
-def start(update: Update, _: CallbackContext) -> None:
+
+def start(update: Update, _) -> None:
     """Sends explanation on how to use the bot."""
     update.message.reply_text(
         "Hi! By now I don't have many features because I'm small. But check the command /todo to help to develop me")
@@ -54,7 +56,7 @@ def echo(update, context: CallbackContext) -> None:
 
 def cris(update: Update, _) -> None:
     """A friendly message"""
-    update.message.reply_text('@EKO0032 CTM we')
+    update.message.reply_text('@EKO0032 Hello dear friend')
 
 
 def unknown(update, context) -> None:
@@ -69,21 +71,31 @@ def daily_job(context: CallbackContext) -> None:
 
 
 def main() -> None:
+    """Run the main process. 
+    idle:
+    Block until you press Ctrl-C or the process receives SIGINT, SIGTERM or
+    SIGABRT. This should be used most of the time, since start_polling() is
+    non-blocking and will stop the bot gracefully.
+    """
+    TOKEN = getBotToken()
+    PORT = getPort()
+    NAME = 'researcher-bot'
     """Run Bot"""
-    updater = Updater(token=bot_token)
+    updater = Updater(token=TOKEN)
+
     # Init the JobQueue
-    jobQueue = updater.job_queue
+    # TODO: Create a method that initializes the JobQueue instead of the main
+    # jobQueue = updater.job_queue
 
     # Init the dispatcher
     dispatcher = updater.dispatcher
-    # NOTE: Example of the job queue
-    # jobQueue.run_repeating(daily_job, interval=10, first=10)
+    #jobQueue.run_repeating(daily_job, interval=10, first=10)
 
     mexico = timezone('America/Mexico_City')
 
     timeToExecute = time(hour=23, minute=30, tzinfo=mexico)
     # NOTE: Validation if the chat corresponds to the group id send it.
-    jobQueue.run_daily(daily_job, time=timeToExecute)
+    #jobQueue.run_daily(daily_job, time=timeToExecute)
 
     # Init the handlers
     start_handler = CommandHandler('start', start)
@@ -94,6 +106,7 @@ def main() -> None:
     unknown_handler = MessageHandler(Filters.command, unknown)
 
     # Add the handlers to the dispatchers
+    # TODO: Update what handlers should be used
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(echo_handler)
     dispatcher.add_handler(info_handler)
@@ -102,12 +115,19 @@ def main() -> None:
     # This handler always should be the last to avoid bugs
     dispatcher.add_handler(unknown_handler)
 
-    # Start the Bot
+    if PORT is not None:
+        print(f'Listen at: {PORT}')
+        # Start the webhook
+        updater.start_webhook(listen="0.0.0.0",
+                              port=int(PORT),
+                              url_path=TOKEN,
+                              webhook_url=f"https://{NAME}.herokuapp.com/{TOKEN}")
+        updater.idle()
+        return
+    # Use polling method for the bot
+    # Start the Bot usint the `getUpdates` API method
+    updater.bot.delete_webhook()
     updater.start_polling()
-
-    # Block until you press Ctrl-C or the process receives SIGINT, SIGTERM or
-    # SIGABRT. This should be used most of the time, since start_polling() is
-    # non-blocking and will stop the bot gracefully.
     updater.idle()
 
 

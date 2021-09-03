@@ -1,3 +1,7 @@
+# TODO
+
+Update the telegram commnands with BotFather...
+
 # Telegram Basic Bot
 
 Use an environment to avoid crash between libraries
@@ -26,3 +30,4 @@ https://github.com/python-telegram-bot/python-telegram-bot/wiki
 
 https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
+https://devcenter.heroku.com/articles/heroku-local
