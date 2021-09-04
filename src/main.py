@@ -1,12 +1,12 @@
 """
-Simple Bot to reply to Telegram bots
+By the way a little moment I hope I an few month will be a nice a big bot
 """
 
 # Just print basic thing in the console
 import logging
 
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
-from telegram import Update
+from telegram import Update, ParseMode
 from datetime import time
 from pytz import timezone
 
@@ -16,16 +16,20 @@ from utils import getBotToken, getPort
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-# TODO: Add the wake_up method to the bot
+
+def wake_up(update: Update, _):
+    """Basically this method prepares the bot to start to fetch commands"""
+    update.message.reply_text("*Hits his face \nSir I'm ready!!!")
 
 
 def start(update: Update, _) -> None:
     """Sends explanation on how to use the bot."""
     update.message.reply_text(
-        "Hi! By now I don't have many features because I'm small. But check the command /todo to help to develop me")
+        "Type /todo to check what you can do to help to develop this bot\n Tip: Use /wakeup to prepare the bot for fetching")
 
 
 def todo(update: Update, _) -> None:
+
     msg = """
         1. Make some web scrapping
         2. Get links to show in chat
@@ -34,12 +38,14 @@ def todo(update: Update, _) -> None:
         5. Make some validations. For example, if the bot is not inside of my favorite group
         change some lines of the code
     """
-    update.message.reply_text(msg)
+    update.message.reply_text(msg, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def code(update: Update, _) -> None:
-    msg = "Code at: https://github.com/DevKhalyd/researcher_bot/"
+    msg = "Code store  at: https://github.com/DevKhalyd/researcher_bot/"
     update.message.reply_text(msg)
+
+# TODO: Remove the last message that contains the command echo
 
 
 def echo(update, context: CallbackContext) -> None:
@@ -54,11 +60,6 @@ def echo(update, context: CallbackContext) -> None:
         chat_id=update.effective_chat.id, text=useMessage)
 
 
-def cris(update: Update, _) -> None:
-    """A friendly message"""
-    update.message.reply_text('@EKO0032 Hello dear friend')
-
-
 def unknown(update, context) -> None:
     """When a command is sent and is not recognize"""
     context.bot.send_message(chat_id=update.effective_chat.id,
@@ -71,7 +72,7 @@ def daily_job(context: CallbackContext) -> None:
 
 
 def main() -> None:
-    """Run the main process. 
+    """Run the main process
     idle:
     Block until you press Ctrl-C or the process receives SIGINT, SIGTERM or
     SIGABRT. This should be used most of the time, since start_polling() is
@@ -80,38 +81,30 @@ def main() -> None:
     TOKEN = getBotToken()
     PORT = getPort()
     NAME = 'researcher-bot'
+
     """Run Bot"""
     updater = Updater(token=TOKEN)
 
-    # Init the JobQueue
-    # TODO: Create a method that initializes the JobQueue instead of the main
-    # jobQueue = updater.job_queue
-
     # Init the dispatcher
     dispatcher = updater.dispatcher
-    #jobQueue.run_repeating(daily_job, interval=10, first=10)
-
-    mexico = timezone('America/Mexico_City')
-
-    timeToExecute = time(hour=23, minute=30, tzinfo=mexico)
-    # NOTE: Validation if the chat corresponds to the group id send it.
-    #jobQueue.run_daily(daily_job, time=timeToExecute)
 
     # Init the handlers
     start_handler = CommandHandler('start', start)
     echo_handler = CommandHandler('echo', echo)
-    info_handler = CommandHandler('code', code)
+    code_handler = CommandHandler('code', code)
     todo_handler = CommandHandler('todo', todo)
-    cris_handler = CommandHandler('cris', cris)
+    wake_up_handler = CommandHandler('wakeup', wake_up)
+
+    # This handler always should be the last to avoid bugs
     unknown_handler = MessageHandler(Filters.command, unknown)
 
     # Add the handlers to the dispatchers
-    # TODO: Update what handlers should be used
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(echo_handler)
-    dispatcher.add_handler(info_handler)
+    dispatcher.add_handler(code_handler)
     dispatcher.add_handler(todo_handler)
-    dispatcher.add_handler(cris_handler)
+    dispatcher.add_handler(wake_up_handler)
+
     # This handler always should be the last to avoid bugs
     dispatcher.add_handler(unknown_handler)
 

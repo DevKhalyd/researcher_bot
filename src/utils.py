@@ -6,7 +6,6 @@ import os
 KEY_TOKEN = 'TOKEN'
 KEY_PORT = 'PORT'
 
-
 def getBotToken() -> str:
     """Get the bot token according to the environment"""
     token = os.environ.get(KEY_TOKEN)
@@ -22,7 +21,6 @@ def getPort():
     """Get the port to start to listen. If this one returns None means that the environment is local"""
     port = os.environ.get('PORT')
     return port
-
 
 def getValueFromJsonFile(key, file='keys.json'):
     """Get a value from a json file a handle the errors. Could return None"""
