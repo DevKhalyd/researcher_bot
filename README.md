@@ -32,6 +32,22 @@ https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets
 
 ## Resources
 
+**MAKRDOWN V2**
+
+https://stackoverflow.com/questions/62230148/python-telegram-bot-markdown
+
+Oficial Docs:
+
+https://core.telegram.org/bots/api#markdownv2-style
+
+**Emojis Supported by GitHub**
+
+https://gist.github.com/rxaviers/7360908
+
+or If you are on Windows use:
+
+`Windows` + `.` 👌
+
 **The time zones in the world**
 https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 

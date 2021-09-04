@@ -11,6 +11,7 @@ from datetime import time
 from pytz import timezone
 
 from utils import getBotToken, getPort
+from values import REPLY_TODO, REPLY_WAKE_UP, REPLY_START
 
 # Enable logging
 logging.basicConfig(level=logging.DEBUG,
@@ -19,26 +20,17 @@ logging.basicConfig(level=logging.DEBUG,
 
 def wake_up(update: Update, _):
     """Basically this method prepares the bot to start to fetch commands"""
-    update.message.reply_text("*Hits his face \nSir I'm ready!!!")
+    update.message.reply_text(REPLY_WAKE_UP, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def start(update: Update, _) -> None:
     """Sends explanation on how to use the bot."""
-    update.message.reply_text(
-        "Type /todo to check what you can do to help to develop this bot\n Tip: Use /wakeup to prepare the bot for fetching")
+    update.message.reply_text(REPLY_START, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def todo(update: Update, _) -> None:
-
-    msg = """
-        1. Make some web scrapping
-        2. Get links to show in chat
-        3. Rate the content
-        4. Get the latest info about each topic
-        5. Make some validations. For example, if the bot is not inside of my favorite group
-        change some lines of the code
-    """
-    update.message.reply_text(msg, parse_mode=ParseMode.MARKDOWN_V2)
+    """What to do to help to develop this bot"""
+    update.message.reply_text(REPLY_TODO, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def code(update: Update, _) -> None:
@@ -46,7 +38,6 @@ def code(update: Update, _) -> None:
     update.message.reply_text(msg)
 
 # TODO: Remove the last message that contains the command echo
-
 
 def echo(update, context: CallbackContext) -> None:
     """Print a message sent by the user"""
@@ -56,8 +47,13 @@ def echo(update, context: CallbackContext) -> None:
     if not useMessage:
         useMessage = "Missing word to echo"
 
+    useMessage = f"**{useMessage}**"
+
     context.bot.send_message(
-        chat_id=update.effective_chat.id, text=useMessage)
+        chat_id=update.effective_chat.id,
+        text=useMessage,
+        parse_mode=ParseMode.MARKDOWN_V2,
+    )
 
 
 def unknown(update, context) -> None:
@@ -119,7 +115,8 @@ def main() -> None:
         return
     # Use polling method for the bot
     # Start the Bot usint the `getUpdates` API method
-    updater.bot.delete_webhook()
+    # TODO: Remove this one for prod
+    #updater.bot.delete_webhook()
     updater.start_polling()
     updater.idle()
 

@@ -2,7 +2,7 @@
 # Environment
 /.venv
 __pycache__
-EXAMPLE.md
+/md
 
 # Sensible data
 *.json
