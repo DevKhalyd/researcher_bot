@@ -59,9 +59,12 @@ https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 https://devcenter.heroku.com/articles/heroku-local
 
 ```python
-     mexico = timezone('America/Mexico_City')
+    mexico = timezone('America/Mexico_City')
     timeToExecute = time(hour=23, minute=30, tzinfo=mexico)
     # NOTE: Validation if the chat corresponds to the group id send it.
+    # Import those libraries and check the repository...
+    from datetime import time
+    from pytz import timezone
+    #Handle the time in Mexico City
     jobQueue.run_daily(daily_job, time=timeToExecute)
-    Handle the time in Mexico City
 ```
