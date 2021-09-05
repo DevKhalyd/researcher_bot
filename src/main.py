@@ -1,12 +1,12 @@
 """
-By the way a little moment I hope I an few month will be a nice a big bot
+By the moment  a little bot  I hope I an few months will be a big bot
 """
 
 # Just print basic thing in the console
 import logging
 
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
-from telegram import Update, ParseMode
+from telegram import Update, ParseMode, MessageEntity
 from datetime import time
 from pytz import timezone
 
@@ -37,34 +37,31 @@ def code(update: Update, _) -> None:
     msg = "Code store  at: https://github.com/DevKhalyd/researcher_bot/"
     update.message.reply_text(msg)
 
-# TODO: Remove the last message that contains the command echo
 
-def echo(update, context: CallbackContext) -> None:
+def echo(update: Update, context) -> None:
     """Print a message sent by the user"""
-    # Get the last message
-    useMessage = update.message.text.replace('/echo@reply_msgs_bot', '')
+    message = update.message
+    update.message.delete()
+    useMessage = message.text
+    entities = message.parse_entities([MessageEntity.BOT_COMMAND])
+    commandToDelete = None
+    for _, v in entities.items():
+        commandToDelete = v
 
-    if not useMessage:
-        useMessage = "Missing word to echo"
-
-    useMessage = f"**{useMessage}**"
-
-    context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=useMessage,
-        parse_mode=ParseMode.MARKDOWN_V2,
-    )
+    if commandToDelete is not None:
+        useMessage = useMessage.replace(commandToDelete, '')
+    # NOTE: Migth be that here we need other statement to handle if this one is None
+    useMessage = f"*{useMessage}*"
+    #update.message.reply_text(useMessage, parse_mode=ParseMode.MARKDOWN_V2)
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text=useMessage,
+                             parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def unknown(update, context) -> None:
     """When a command is sent and is not recognize"""
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="Sorry, I didn't understand that command. Run the command /help to see all commands")
-
-
-def daily_job(context: CallbackContext) -> None:
-    context.bot.send_message(chat_id='288386043',
-                             text='One message every day')
 
 
 def main() -> None:
@@ -104,19 +101,16 @@ def main() -> None:
     # This handler always should be the last to avoid bugs
     dispatcher.add_handler(unknown_handler)
 
+    # Start the webhook
     if PORT is not None:
-        print(f'Listen at: {PORT}')
-        # Start the webhook
         updater.start_webhook(listen="0.0.0.0",
                               port=int(PORT),
                               url_path=TOKEN,
                               webhook_url=f"https://{NAME}.herokuapp.com/{TOKEN}")
         updater.idle()
         return
-    # Use polling method for the bot
     # Start the Bot usint the `getUpdates` API method
-    # TODO: Remove this one for prod
-    #updater.bot.delete_webhook()
+    updater.bot.delete_webhook()
     updater.start_polling()
     updater.idle()
 

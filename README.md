@@ -8,6 +8,10 @@
 
 Use an environment to avoid crash between libraries
 
+Docs:
+
+https://python-telegram-bot.readthedocs.io/en/stable/
+
 ## What to do when updates the code?
 
 1. Update the commands in Telegram Father
