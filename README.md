@@ -1,8 +1,8 @@
 # TODO
 
-1. Update the telegram commnands with BotFather...
-
-2. Update the token with another one to avoid the bot stolen
+1. Update the telegram commnands with BotFather..
+   .
+1. Update the token with another one to avoid the bot stolen
 
 # Telegram Basic Bot
 
@@ -68,3 +68,7 @@ https://devcenter.heroku.com/articles/heroku-local
     #Handle the time in Mexico City
     jobQueue.run_daily(daily_job, time=timeToExecute)
 ```
+
+# Deploy
+
+git push heroku main

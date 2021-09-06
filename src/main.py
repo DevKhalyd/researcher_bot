@@ -6,7 +6,7 @@ By the moment  a little bot  I hope I an few months will be a big bot
 import logging
 
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
-from telegram import Update, ParseMode, MessageEntity, message
+from telegram import Update, ParseMode, MessageEntity
 
 from utils import getBotToken, getPort
 from values import REPLY_TODO, REPLY_WAKE_UP, REPLY_START
@@ -50,7 +50,6 @@ def echo(update: Update, context: CallbackContext) -> None:
     if commandToDelete is not None:
         useMessage = useMessage.replace(commandToDelete, '')
     useMessage = f"*{useMessage}*"
-    #update.message.reply_text(useMessage, parse_mode=ParseMode.MARKDOWN_V2)
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=useMessage,
                              parse_mode=ParseMode.MARKDOWN_V2)
@@ -62,25 +61,63 @@ def unknown(update, _) -> None:
     update.message.reply_text(msg)
 
 
-def file(update: Update, _) -> None:
+def file(update: Update, context: CallbackContext) -> None:
     """Depending of the type of file the bot send a response"""
-
     message = update.message
-
     isPhoto = len(message.photo or []) > 0
     isVideo = message.video is not None
+    media_group_id = update.message.media_group_id
 
-    logging.warning(f'Is isPhoto: {isPhoto} ')
-    logging.warning(f'Is Video:{isVideo} ')
+    shouldNotContinue = True
 
+    if media_group_id is not None:
+        chat_id = update._effective_chat.id
+        chat_data = context.chat_data
+        # Keys
+        key_media = f'media_group_id_{chat_id}'
+        key_was_sent_msg = 'msg_was_sent'
+        # Logic to save and get the data
+        media_group_id_last_saved = chat_data.get(key_media)
+        # Retrieve the data or update depending of the case
+        if media_group_id_last_saved is None:
+            chat_data[key_media] = media_group_id
+        else:
+            # New set of files
+            if media_group_id_last_saved != media_group_id:
+                chat_data.update({
+                    key_media: media_group_id,
+                    key_was_sent_msg: False
+                })
+
+        was_sent_msg = chat_data.get(key_was_sent_msg, False)
+
+        if not was_sent_msg:
+            shouldNotContinue = False
+            # The messaage was sent in this media group
+    else:
+        shouldNotContinue = False
+
+    if shouldNotContinue:
+        return
+
+    # IMPROVE: Take a list of emojis and generate randomly
     if isPhoto:
-        update.message.reply_text("Nice pic, dude")
+        msg = '*Nice pic\(s\)\, dude\. 🥵*'
+        update.message.reply_text(msg, parse_mode=ParseMode.MARKDOWN_V2)
 
     if isVideo:
-        update.message.reply_text("Nice video, dude")
+        update.message.reply_text(
+            "*Nice video\(s\)\, dude\.* 🥴 ", parse_mode=ParseMode.MARKDOWN_V2)
 
     if not isVideo and not isPhoto:
-        update.message.reply_text("It's a virus?")
+        update.message.reply_text(
+            "*It's a virus?* 🐉 ", parse_mode=ParseMode.MARKDOWN_V2)
+
+    if media_group_id is not None:
+        chat_data.update({
+            key_media: media_group_id,
+            key_was_sent_msg: True
+        })
 
 
 def main() -> None:
