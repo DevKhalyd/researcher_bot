@@ -8,6 +8,9 @@ Type /help to see all the commands available.
 REPLY_HELP = '''
 /help See all the available commands.
 /code See the source code of this bot.
+/version See the current version of this bot.
 /echo Use the following sintax to allow the bot to speak. /echo <YourMessage>
 /search Use the following sintax to search in Reddit. /search <Whatever you want>
 '''
+
+REPLY_VERSION = '*1.0.1*'

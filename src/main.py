@@ -7,7 +7,7 @@ from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandle
 from telegram import Update, ParseMode, MessageEntity
 
 from utils import getBotToken, getPort
-from values import REPLY_START, REPLY_HELP
+from values import REPLY_START, REPLY_HELP, REPLY_VERSION
 
 # Enable logging
 logging.basicConfig(level=logging.DEBUG,
@@ -23,6 +23,10 @@ def help(update: Update, _) -> None:
     """Show all the avaible commands"""
     update.message.reply_text(REPLY_HELP, parse_mode=ParseMode.MARKDOWN_V2)
 
+
+def version(update: Update, _) -> None:
+    """Show all the avaible commands"""
+    update.message.reply_text(REPLY_VERSION, parse_mode=ParseMode.MARKDOWN_V2)
 
 def code(update: Update, _) -> None:
     """Shows where the code stored is"""
@@ -137,6 +141,7 @@ def main() -> None:
     echo_handler = CommandHandler('echo', echo)
     code_handler = CommandHandler('code', code)
     help_handler = CommandHandler('help', help)
+    version_handler = CommandHandler('version', version)
 
     # Filter Handler
     file_handler = MessageHandler(Filters.video | Filters.photo | Filters.document,
@@ -151,6 +156,7 @@ def main() -> None:
     dispatcher.add_handler(code_handler)
     dispatcher.add_handler(help_handler)
     dispatcher.add_handler(file_handler)
+    dispatcher.add_handler(version_handler)
     # This dispatcher always should be the last to avoid bugs
     dispatcher.add_handler(unknown_handler)
 
