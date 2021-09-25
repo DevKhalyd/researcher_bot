@@ -16,7 +16,7 @@ https://python-telegram-bot.readthedocs.io/en/stable/
 
 1. Update the commands in Telegram Father
 
-2. Update in the platform host (Heroku)
+2. Update in Heroku
 
 ## Documentation
 

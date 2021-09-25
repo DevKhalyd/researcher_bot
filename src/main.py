@@ -1,37 +1,31 @@
 """
-By the moment  a little bot  I hope I an few months will be a big bot
+A Reddit Scrapping Bot
 """
-
-# Just print basic thing in the console
 import logging
 
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
 from telegram import Update, ParseMode, MessageEntity
 
 from utils import getBotToken, getPort
-from values import REPLY_TODO, REPLY_WAKE_UP, REPLY_START
+from values import REPLY_START, REPLY_HELP
 
 # Enable logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
-def wake_up(update: Update, _):
-    """Basically this method prepares the bot to start to fetch commands"""
-    update.message.reply_text(REPLY_WAKE_UP, parse_mode=ParseMode.MARKDOWN_V2)
-
-
 def start(update: Update, _) -> None:
-    """Sends explanation on how to use the bot."""
+    """An introduction to the bot"""
     update.message.reply_text(REPLY_START, parse_mode=ParseMode.MARKDOWN_V2)
 
 
-def todo(update: Update, _) -> None:
-    """What to do to help to develop this bot"""
-    update.message.reply_text(REPLY_TODO, parse_mode=ParseMode.MARKDOWN_V2)
+def help(update: Update, _) -> None:
+    """Show all the avaible commands"""
+    update.message.reply_text(REPLY_HELP, parse_mode=ParseMode.MARKDOWN_V2)
 
 
 def code(update: Update, _) -> None:
+    """Shows where the code stored is"""
     msg = "Code store  at: https://github.com/DevKhalyd/researcher_bot/"
     update.message.reply_text(msg)
 
@@ -61,6 +55,7 @@ def unknown(update, _) -> None:
     update.message.reply_text(msg)
 
 
+# TODO: FIX THIS MEHTOD
 def file(update: Update, context: CallbackContext) -> None:
     """Depending of the type of file the bot send a response"""
     message = update.message
@@ -141,8 +136,7 @@ def main() -> None:
     start_handler = CommandHandler('start', start)
     echo_handler = CommandHandler('echo', echo)
     code_handler = CommandHandler('code', code)
-    todo_handler = CommandHandler('todo', todo)
-    wake_up_handler = CommandHandler('wakeup', wake_up)
+    help_handler = CommandHandler('help', help)
 
     # Filter Handler
     file_handler = MessageHandler(Filters.video | Filters.photo | Filters.document,
@@ -155,9 +149,7 @@ def main() -> None:
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(echo_handler)
     dispatcher.add_handler(code_handler)
-    dispatcher.add_handler(todo_handler)
-    dispatcher.add_handler(wake_up_handler)
-
+    dispatcher.add_handler(help_handler)
     dispatcher.add_handler(file_handler)
     # This dispatcher always should be the last to avoid bugs
     dispatcher.add_handler(unknown_handler)
