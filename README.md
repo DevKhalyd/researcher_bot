@@ -1,8 +1,8 @@
 # TODO
 
-1. Update the telegram commnands with BotFather..
-   .
-1. Update the token with another one to avoid the bot stolen
+1. Update the telegram commnands with BotFather...
+2. Update the token with another one to avoid the bot stolen
+3. Update the version each time the bot is updated
 
 # Telegram Basic Bot
 
@@ -37,6 +37,8 @@ https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets
 ## Resources
 
 **MAKRDOWN V2**
+
+Correct use:
 
 https://stackoverflow.com/questions/62230148/python-telegram-bot-markdown
 

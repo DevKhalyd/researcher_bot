@@ -1,30 +1,65 @@
 """Handle the common utils for the bot functionality"""
-
+import random
 import json
 import os
+
+from telegram import Update, ParseMode
 
 KEY_TOKEN = 'TOKEN'
 KEY_PORT = 'PORT'
 
 
-def getBotToken() -> str:
+def get_bot_token() -> str:
     """Get the bot token according to the environment"""
     token = os.environ.get(KEY_TOKEN)
     if type(token) == str:
         return token
 
-    token = getValueFromJsonFile(KEY_TOKEN)
+    token = get_value_from_json(KEY_TOKEN)
     if type(token) == str:
         return token
 
 
-def getPort():
+def get_port():
     """Get the port to start to listen. If this one returns None means that the environment is local"""
     port = os.environ.get('PORT')
     return port
 
 
-def getValueFromJsonFile(key, file='keys.json'):
+def allow_send_message(d1: str, d2: str) -> bool:
+    """
+    Get the difference between two hours given and return True if allow to send a message
+    :param str d1: The initial date
+    :param str d2: The final date
+    return: If is allowed to send a message
+    rtype: True
+    """
+    itemsD1 = d1.split(':')
+    itemsD2 = d2.split(':')
+
+    if len(itemsD1) != len(itemsD2):
+        return True
+
+    hourD1 = int(itemsD1[0])
+    hourD2 = int(itemsD2[0])
+
+    # Not the same hour
+    if hourD1 != hourD2:
+        return True
+
+    minuteD1 = int(itemsD1[1])
+    minuteD2 = int(itemsD2[1])
+
+    difference = minuteD2 - minuteD1
+
+    if difference < 0:
+        return True
+    print(f"Difference: {difference}")
+    # Minutes to send another message
+    return difference > 0
+
+
+def get_value_from_json(key, file='keys.json'):
     """Get a value from a json file a handle the errors. Could return None"""
     try:
         f = open(file)
@@ -35,3 +70,46 @@ def getValueFromJsonFile(key, file='keys.json'):
     except:
         raise ValueError(
             f'${key} is not defined. Please verify the environment')
+
+
+def send_message_type(update: Update):
+    """Send message according to the type of message (Image,Video,File)"""
+    # NOTE: Also a job can help to send this message
+    message = update.message
+    isPhoto = len(message.photo or []) > 0
+    isVideo = message.video is not None
+    isFile = not isVideo and not isPhoto
+
+    # IMPROVE: Take a list of emojis and generate randomly
+    if isPhoto:
+        msg = f'*Nice {definition_image()}, dude\.* {generate_emoji()}'
+        update.message.reply_text(msg, parse_mode=ParseMode.MARKDOWN_V2)
+
+    if isVideo:
+        update.message.reply_text(
+            f"*Nice {definition_video()}, dude\.* {generate_emoji()} ", parse_mode=ParseMode.MARKDOWN_V2)
+
+    if isFile:
+        update.message.reply_text(
+            f"*It's a virus?* {generate_emoji()}", parse_mode=ParseMode.MARKDOWN_V2)
+
+
+def generate_emoji():
+    """Generates a emoji randomly"""
+    emojis = ['🥴', '🤔', '👿', '🥳', '🥵', '😎', '👾', '🥶', '🤩']
+    n = random.randint(0, len(emojis) - 1)
+    return emojis[n]
+
+
+def definition_image():
+    """Get a image definition"""
+    imgs = ['img', 'pic', '\.jpg', '\.png']
+    n = random.randint(0, len(imgs) - 1)
+    return imgs[n]
+
+
+def definition_video():
+    """Get a video  definition"""
+    videos = ['video', '\.mp4', 'videou']
+    n = random.randint(0, len(videos) - 1)
+    return videos[n]
