@@ -1,9 +1,11 @@
 """Handle the common utils for the bot functionality"""
+from typing import Union, List
 import random
 import json
 import os
 
-from telegram import Update, ParseMode
+from functools import wraps
+from telegram import Update, ParseMode, ChatAction, InlineKeyboardButton
 
 KEY_TOKEN = 'TOKEN'
 KEY_PORT = 'PORT'
@@ -54,7 +56,6 @@ def allow_send_message(d1: str, d2: str) -> bool:
 
     if difference < 0:
         return True
-    print(f"Difference: {difference}")
     # Minutes to send another message
     return difference > 0
 
@@ -113,3 +114,40 @@ def definition_video():
     videos = ['video', '\.mp4', 'videou']
     n = random.randint(0, len(videos) - 1)
     return videos[n]
+
+# Ref: https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#send-a-chat-action
+#  context.bot.send_chat_action(chat_id=update.effective_chat.id,
+#                                  action=ChatAction.TYPING
+#                                  )
+
+def send_typing_action(func):
+    """Sends typing action while processing func command."""
+
+    @wraps(func)
+    def command_func(update, context, *args, **kwargs):
+        context.bot.send_chat_action(
+            chat_id=update.effective_message.chat_id, action=ChatAction.TYPING)
+        return func(update, context,  *args, **kwargs)
+
+    return command_func
+
+def build_menu(
+    buttons: List[InlineKeyboardButton],
+    n_cols: int,
+    header_buttons: Union[InlineKeyboardButton, List[InlineKeyboardButton]]=None,
+    footer_buttons: Union[InlineKeyboardButton, List[InlineKeyboardButton]]=None
+) -> List[List[InlineKeyboardButton]]:
+    """
+    Build a menu with Buttons
+    Ref: https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#build-a-menu-with-buttons
+    """
+    # Behavior of [i:i]
+    # https://stackoverflow.com/questions/59060606/in-python-why-is-listii-n-insert-an-element-in-listii
+    # https://docs.python.org/3/library/stdtypes.html?highlight=list#mutable-sequence-types
+    menu = [buttons[i:i + n_cols] for i in range(0, len(buttons), n_cols)]
+    if header_buttons:
+        menu.insert(0, header_buttons if isinstance(header_buttons, list) else [header_buttons])
+    if footer_buttons:
+        menu.append(footer_buttons if isinstance(footer_buttons, list) else [footer_buttons])
+    return menu
+

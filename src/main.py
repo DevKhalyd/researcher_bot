@@ -4,11 +4,31 @@ A Reddit Scrapping Bot
 import logging
 from datetime import datetime
 
-from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
-from telegram import Update, ParseMode, MessageEntity
+from telegram.ext import (
+    Updater,
+    CallbackContext,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    Filters,
+)
+from telegram import (
+    Update, ParseMode,
+    MessageEntity,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup
+)
+
+from utils import (
+    get_bot_token,
+    get_port,
+    allow_send_message,
+    send_message_type,
+    send_typing_action,
+    build_menu,
+)
 
 from values import REPLY_START, REPLY_HELP, REPLY_VERSION
-from utils import get_bot_token, get_port, allow_send_message, send_message_type
 
 # Enable logging
 logging.basicConfig(level=logging.DEBUG,
@@ -36,6 +56,12 @@ def code(update: Update, _) -> None:
     update.message.reply_text(msg)
 
 
+def unknown(update: Update, _) -> None:
+    msg = "Sorry, I didn't understand that command. Run the command /help to see all commands"
+    """When a command is sent and is not recognized"""
+    update.message.reply_text(msg)
+
+
 def echo(update: Update, context: CallbackContext) -> None:
     """Print a message sent by the user and delete the message who sent this one"""
     message = update.message
@@ -55,12 +81,6 @@ def echo(update: Update, context: CallbackContext) -> None:
                              parse_mode=ParseMode.MARKDOWN_V2)
 
 
-def unknown(update, _) -> None:
-    msg = "Sorry, I didn't understand that command. Run the command /help to see all commands"
-    """When a command is sent and is not recognize"""
-    update.message.reply_text(msg)
-
-
 def file(update: Update, context: CallbackContext) -> None:
     """Listen when a video, image or file is send to the server then send a message to the user(s)"""
     key = f'date_{update.message.media_group_id}'
@@ -69,7 +89,7 @@ def file(update: Update, context: CallbackContext) -> None:
     last_date = chat_data.get(key)
     currentDate = datetime.today().strftime('%X')
 
-    # Send message according to the sort of message and assing the last_date
+    # Send message according to the sort of message and assign the last_date
     if last_date is None:
         # Assign by first time
         chat_data[key] = currentDate
@@ -79,14 +99,48 @@ def file(update: Update, context: CallbackContext) -> None:
     isAllowed = allow_send_message(last_date, currentDate)
 
     if not isAllowed:
-        print('Not allowed')
         return
     # Send message according to the sort of message and update the last_message
-    chat_data.update({
-        key: currentDate
-    })
+    chat_data.update({key: currentDate})
     send_message_type(update)
 
+# Use instead the manually method
+# @send_typing_action
+
+# https://github.com/python-telegram-bot/python-telegram-bot/wiki/Storing-bot,-user-and-chat-related-data
+@send_typing_action
+def search(update: Update, context: CallbackContext) -> None:
+    """Scrapping on Reddit and send the fetched results"""
+
+    args = context.args
+
+    if len(args or []) == 0:
+        msg = "The search param can't be empty"
+        update.message.reply_text(msg, parse_mode=ParseMode.MARKDOWN_V2)
+        return
+
+    # Contains the data to search
+    lookup = ""
+
+    for i, arg in enumerate(args):
+        lookup += arg
+        lookup += "" if i == (len(args) - 1) else "&20"
+
+    button_list = [
+        InlineKeyboardButton("See more", callback_data='Send on callback')
+    ]
+
+    reply_markup = InlineKeyboardMarkup(build_menu(button_list, n_cols=2))
+
+    update.message.reply_text(lookup, reply_markup=reply_markup)
+
+def search_query_handler_callback(update: Update, context: CallbackContext) -> None:
+    """Handle the search command responses"""
+    query = update.callback_query
+    # CallbackQueries need to be answered, even if no notification to the user is needed
+    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+    query.answer()
+    query.edit_message_text(text=f"{query.data}")
 
 def main() -> None:
     """Run the main process
@@ -111,7 +165,8 @@ def main() -> None:
     code_handler = CommandHandler('code', code)
     help_handler = CommandHandler('help', help)
     version_handler = CommandHandler('version', version)
-
+    search_handler = CommandHandler('search', search)
+    search_query_handler = CallbackQueryHandler(search_query_handler_callback)
     # Filter Handler
     file_handler = MessageHandler(Filters.video | Filters.photo | Filters.document,
                                   file)
@@ -126,6 +181,8 @@ def main() -> None:
     dispatcher.add_handler(help_handler)
     dispatcher.add_handler(file_handler)
     dispatcher.add_handler(version_handler)
+    dispatcher.add_handler(search_handler)
+    dispatcher.add_handler(search_query_handler)
     # This dispatcher always should be the last to avoid bugs
     dispatcher.add_handler(unknown_handler)
 
