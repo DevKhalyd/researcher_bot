@@ -14,3 +14,5 @@ REPLY_HELP = '''
 '''
 
 REPLY_VERSION = '*1\.0\.1*'
+
+LIST = 'list_'

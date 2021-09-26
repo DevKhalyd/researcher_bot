@@ -5,6 +5,9 @@
 # beautifulsoup4
 
 python-telegram-bot
+lxml
+beautifulsoup4
+requests
 
 # Requirements with Version Specifiers ######`
 

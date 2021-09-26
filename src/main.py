@@ -3,6 +3,7 @@ A Reddit Scrapping Bot
 """
 import logging
 from datetime import datetime
+from typing import List
 
 from telegram.ext import (
     Updater,
@@ -28,7 +29,11 @@ from utils import (
     build_menu,
 )
 
-from values import REPLY_START, REPLY_HELP, REPLY_VERSION
+from values import LIST, REPLY_START, REPLY_HELP, REPLY_VERSION
+
+from reddit_item import RedditItem
+
+from scrapping import get_reddit_search_url, get_results_from_reddit
 
 # Enable logging
 logging.basicConfig(level=logging.DEBUG,
@@ -114,7 +119,7 @@ def search(update: Update, context: CallbackContext) -> None:
 
     args = context.args
 
-    if len(args or []) == 0:
+    if not args:
         msg = "The search param can't be empty"
         update.message.reply_text(msg, parse_mode=ParseMode.MARKDOWN_V2)
         return
@@ -124,23 +129,74 @@ def search(update: Update, context: CallbackContext) -> None:
 
     for i, arg in enumerate(args):
         lookup += arg
-        lookup += "" if i == (len(args) - 1) else "&20"
+        lookup += "" if i == (len(args) - 1) else "%20"
+
+    results = get_results_from_reddit(lookup)
+
+    if not results:
+        update.message.reply_text('Try with another phrase. Results not found')
+        return
 
     button_list = [
-        InlineKeyboardButton("See more", callback_data='Send on callback')
+        InlineKeyboardButton("See more", callback_data=lookup),
     ]
 
+    total_to_send = len(results) // 2
+    items_remaining : List[RedditItem] = []
     reply_markup = InlineKeyboardMarkup(build_menu(button_list, n_cols=2))
 
-    update.message.reply_text(lookup, reply_markup=reply_markup)
+    for i,item in enumerate(results):
+        if i < total_to_send:
+            # Send messages
+            update.message.reply_text(item.convert_to_telegram_msg())
+        elif i == total_to_send:
+            # Message with action
+            update.message.reply_text(item.convert_to_telegram_msg(),reply_markup=reply_markup)
+        else:
+            # Save items for later
+            items_remaining.append(item)
+    
+    items_string = RedditItem.convert_list_to_string(items_remaining)
+    chat_data = context.chat_data
+    chat_data.update({f'{LIST}{lookup}':items_string})
+
 
 def search_query_handler_callback(update: Update, context: CallbackContext) -> None:
     """Handle the search command responses"""
+
+    def final_response(lookup : str)->None:
+        # CallbackQueries need to be answered, even if no notification to the user is needed
+        # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
+        query.answer()
+        query.edit_message_text(text=f"If you wanna see more: {get_reddit_search_url(lookup)}")
+
     query = update.callback_query
-    # CallbackQueries need to be answered, even if no notification to the user is needed
-    # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
-    query.answer()
-    query.edit_message_text(text=f"{query.data}")
+    lookup = query.data
+    
+    chat_data = context.chat_data
+
+    items_string = chat_data.get(f'{LIST}{lookup}')
+
+    print(items_string)
+
+    if not items_string:
+        final_response(lookup)
+        return
+    
+    items = RedditItem.convert_string_to_list(items_string)
+
+    if not items:
+        final_response(lookup)
+        return
+    
+    for item in items:
+        msg = item.convert_to_telegram_msg()
+        if msg is not None:
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                             text=msg)
+    
+    final_response(lookup)
+    chat_data.clear()
 
 def main() -> None:
     """Run the main process

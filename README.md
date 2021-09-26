@@ -1,8 +1,7 @@
 # TODO
 
 1. Update the telegram commnands with BotFather...
-2. Update the token with another one to avoid the bot stolen
-3. Update the version each time the bot is updated
+2. Update the version each time the bot is updated
 
 # Telegram Basic Bot
 
