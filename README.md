@@ -1,8 +1,3 @@
-# TODO
-
-1. Update the telegram commnands with BotFather...
-2. Update the version each time the bot is updated
-
 # Telegram Basic Bot
 
 Use an environment to avoid crash between libraries
@@ -15,7 +10,9 @@ https://python-telegram-bot.readthedocs.io/en/stable/
 
 1. Update the commands in Telegram Father
 
-2. Update in Heroku
+2. Update the version each time the bot is updated
+
+3. Update in Heroku
 
 ## Documentation
 
@@ -32,6 +29,11 @@ https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets
 `pip install python-telegram-bot[ujson]` installs the ujson library. It will then be used for JSON de- & encoding, which can bring speed up compared to the standard json library.
 
 `pip install python-telegram-bot[socks]` installs the PySocks library. Use this, if you want to work behind a Socks5 server.
+
+## Learn
+
+**How to print pretty json**
+https://stackoverflow.com/a/12944035/10942018
 
 ## Resources
 
