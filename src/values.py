@@ -13,6 +13,6 @@ REPLY_HELP = '''
 \- /search Use the following sintax to search in Reddit: /search <Whatever you want\>
 '''
 
-REPLY_VERSION = '*1\.0\.1*'
+REPLY_VERSION = '*1\.0\.2*'
 
 LIST = 'list_'

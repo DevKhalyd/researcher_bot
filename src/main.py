@@ -31,7 +31,7 @@ from utils import (
 
 from values import LIST, REPLY_START, REPLY_HELP, REPLY_VERSION
 
-from reddit_item import RedditItem
+from models.reddit_item import RedditItem
 
 from scrapping import get_reddit_search_url, get_results_from_reddit
 

@@ -74,9 +74,34 @@ class RedditItem:
 
         return itemsToUse
 
+    
+
+        pass
+
     def __str__(self):
         return f"""
         Title: {self.title}
         Image: {self.image}
         Reference: {self.reference}
         """
+
+def redditItemFromDic(post : any) -> RedditItem:
+    """Create a reddit item from a dictionary"""
+
+    image = None;
+
+    # Get the image
+    try:
+        if post['media'] is not None:
+            image = post['media']['content']
+        else:
+            if post['thumbnail'] is not None:
+                image = post['thumbnail']['url']
+    except:
+        pass
+    
+    return RedditItem(
+        title=post['title'],
+        image=image,
+        reference=post['permalink'],
+    )
