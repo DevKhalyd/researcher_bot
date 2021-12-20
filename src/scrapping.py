@@ -1,13 +1,14 @@
 # Contains the information about the post
+import json
 from typing import List
 from reddit_item import RedditItem
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup,Tag
 import requests
 
 
-itemName = "_2MkcR85HDnYngvlVW2gMMa"
+itemName = "EmAI60CZ6hqtjh7kIC2SS"
 # Contains the ref to the new post
-itemReference = "y8HYJ-y_lTUHkQIc1mdCq _2INHSNB8V5eaWp4P0rY_mE"
+itemReference = "SQnoC3ObvgnGjWt90zD9Z _2INHSNB8V5eaWp4P0rY_mE"
 baseUrl = "https://www.reddit.com"
 
 
@@ -31,13 +32,43 @@ def get_results_from_reddit(lookup: str) -> List[RedditItem]:
     custom_user_agent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
     response = requests.get(url, headers={"User-Agent": custom_user_agent})
 
+    # Start to scrapping
     # Always install the lxml
     soup = BeautifulSoup(response.text, "lxml")
 
     # Contains all the data necessary to render
-    items = soup.find_all("div", class_=itemName)
-    # Contains all the references
-    itemsReference = soup.find_all("div", class_=itemReference)
+    # items = soup.find_all("div", class_=itemName)
+
+    tag = soup.find("script", id="data")
+
+    if type(tag) is not Tag:
+        print("Error. Is not a tag")
+        return None
+    
+    text = tag.getText()
+
+    jsonToParse = text[14: len(text)  - 1]
+
+
+    d = json.loads(jsonToParse)
+
+   # print (d['features'])
+
+   # Pretty JSON (TODO: Document it)
+   # https://stackoverflow.com/a/12944035/10942018
+   # print(json.dumps(allPosts, indent=4, sort_keys=True))
+
+
+    allPosts = d['posts']['models']
+
+   # TODO: Verify the media is not null otherwise send the thumbail
+
+    for key in allPosts:
+        # TODO: Create the objects of thsese classes to access in a easy way
+        print(json.dumps(allPosts[key], indent=4, sort_keys=True))
+    
+
+    return
 
     redditItems: List[RedditItem] = []
 
